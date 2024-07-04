@@ -1,0 +1,33 @@
+[toolchain]
+
+[features]
+resolution = false
+skip-lint = false
+
+[programs.localnet]
+pt_sol_program = "8hhtjU7SSNWRwoTsj4t6CRvGrpcBRDoq6Vp4oggZBgm2"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/tokens.ts"
+# staking = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/staking.ts"
+
+[test]
+startup_wait = 5000
+shutdown_wait = 2000
+# upgradeable = false
+
+[test.validator]
+bind_address = "0.0.0.0"
+url = "https://api.mainnet-beta.solana.com"
+ledger = "./test-ledger"
+rpc_port = 8899
+
+[[test.validator.clone]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
