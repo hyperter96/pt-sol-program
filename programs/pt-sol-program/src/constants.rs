@@ -12,8 +12,5 @@ pub const TOKEN_SEED: &[u8] = b"token";
 #[constant]
 pub const STAKE_INFO_SEED: &[u8] = b"stake_info";
 
-#[account]
-pub struct StakeInfo {
-    pub stake_at_slot: u64,
-    pub is_staked: bool,
-}
+#[constant]
+pub const THREAD_AUTHORITY_SEED: &[u8] = b"thread_authority";

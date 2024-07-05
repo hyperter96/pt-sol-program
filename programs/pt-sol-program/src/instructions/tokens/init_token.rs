@@ -1,4 +1,5 @@
 use {
+    crate::constants::METADATA_SEED,
     anchor_lang::prelude::*,
     anchor_spl::{
         metadata::{
@@ -7,11 +8,9 @@ use {
         },
         token::{Mint, Token},
     },
-    crate::constants::METADATA_SEED,
 };
 
 pub fn init_token(ctx: Context<InitToken>, metadata: InitTokenParams) -> Result<()> {
-
     let token_data: DataV2 = DataV2 {
         name: metadata.name,
         symbol: metadata.symbol,

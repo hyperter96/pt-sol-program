@@ -1,15 +1,22 @@
+use crate::{
+    constants::{STAKE_INFO_SEED, THREAD_AUTHORITY_SEED, TOKEN_SEED, VAULT_SEED},
+    error::*,
+    state::StakeInfo,
+};
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token::{self, Mint, Token, TokenAccount, Transfer, transfer}};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{self, transfer, Mint, Token, TokenAccount, Transfer},
+};
+use clockwork_sdk::{cpi::ThreadDelete, state::Thread, ThreadProgram};
 use solana_program::clock::Clock;
-use crate::{constants::{TOKEN_SEED, STAKE_INFO_SEED, VAULT_SEED, StakeInfo}, error::*};
 
 pub fn unstake(ctx: Context<UnStake>) -> Result<()> {
-
     // 先拿到stake信息
     let stake_info = &mut ctx.accounts.stake_info_account;
 
     if !stake_info.is_staked {
-        return Err(StakingError::NotStaked.into())
+        return Err(StakingError::NotStaked.into());
     }
 
     let clock = Clock::get()?;
@@ -36,7 +43,7 @@ pub fn unstake(ctx: Context<UnStake>) -> Result<()> {
             },
             signer,
         ),
-         reward,
+        reward,
     )?;
 
     let staker = ctx.accounts.signer.key();
@@ -53,16 +60,34 @@ pub fn unstake(ctx: Context<UnStake>) -> Result<()> {
             },
             signer,
         ),
-         stake_amount,
+        stake_amount,
     )?;
 
     // reset stakeInfo
     stake_info.is_staked = false;
     stake_info.stake_at_slot = clock.slot;
 
+    cleanup(&ctx)?;
+
     Ok(())
 }
 
+fn cleanup(ctx: &Context<UnStake>) -> Result<()> {
+    if !ctx.accounts.thread.data_is_empty() {
+        let bump = ctx.bumps.thread_authority;
+        clockwork_sdk::cpi::thread_delete(CpiContext::new_with_signer(
+            ctx.accounts.clockwork_thread_program.to_account_info(),
+            ThreadDelete {
+                authority: ctx.accounts.thread_authority.to_account_info(),
+                close_to: ctx.accounts.signer.to_account_info(),
+                thread: ctx.accounts.thread.to_account_info(),
+            },
+            &[&[ctx.accounts.mint.key().as_ref(), &[bump]]],
+        ))?;
+    }
+
+    Ok(())
+}
 
 #[derive(Accounts)]
 pub struct UnStake<'info> {
@@ -76,7 +101,6 @@ pub struct UnStake<'info> {
         bump,
     )]
     pub token_vault_account: Account<'info, TokenAccount>,
-
 
     // stake_info账户，存放stake的信息(不是Token账户，这里是自定义的)
     #[account(
@@ -106,4 +130,18 @@ pub struct UnStake<'info> {
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
+
+    // clockwork
+    /// Address to assign to the newly created thread.
+    #[account(mut, address = Thread::pubkey(thread_authority.key(), StakeInfo::get_thread_id(stake_info_account.key())))]
+    pub thread: SystemAccount<'info>,
+
+    /// The pda that will own and manage the thread.
+    #[account(seeds = [THREAD_AUTHORITY_SEED], bump)]
+    pub thread_authority: SystemAccount<'info>,
+
+    #[account(
+        address = clockwork_sdk::ID
+    )]
+    pub clockwork_thread_program: Program<'info, ThreadProgram>,
 }

@@ -14,7 +14,6 @@ pub struct LiquidityPool {
 }
 
 impl LiquidityPool {
-
     // LP的seed prefix, 用于derive PDA
     pub const SEED_PREFIX: &'static str = "liquidity_pool";
 
@@ -72,10 +71,14 @@ pub trait LiquidityPoolAccount<'info> {
         authority: &Signer<'info>,
         token_program: &Program<'info, Token>,
     ) -> Result<()>;
+    fn determine_auto_fund_pool_interval(
+        &self,
+        pool_token_account_balance: u64,
+        stake_amounts: u64,
+    ) -> Result<u64>;
 }
 
 impl<'info> LiquidityPoolAccount<'info> for Account<'info, LiquidityPool> {
-
     fn check_asset_key(&self, key: &Pubkey) -> Result<()> {
         if self.assets.contains(key) {
             Ok(())
@@ -111,7 +114,6 @@ impl<'info> LiquidityPoolAccount<'info> for Account<'info, LiquidityPool> {
         payer: &Signer<'info>,
         system_program: &Program<'info, System>,
     ) -> Result<()> {
-
         let account_info = self.to_account_info();
         let new_account_size = account_info.data_len() + space_to_add;
 
@@ -137,9 +139,8 @@ impl<'info> LiquidityPoolAccount<'info> for Account<'info, LiquidityPool> {
         Ok(())
     }
 
-
     /// 通过将资产从付款人或流动性提供者的代币账户转移到流动性池的代币账户来为流动性池提供资金
-    /// 
+    ///
     /// 在这个函数中，程序还会将铸币地址添加到`LiquidityPool` 数据中存储的铸币地址列表中
     /// （如果不存在），并重新分配账户的大小
     fn fund(
@@ -178,7 +179,6 @@ impl<'info> LiquidityPoolAccount<'info> for Account<'info, LiquidityPool> {
         authority: &Signer<'info>,
         token_program: &Program<'info, Token>,
     ) -> Result<()> {
-
         // (From, To)
         let (receive_mint, pool_recieve, payer_recieve) = receive;
         self.check_asset_key(&receive_mint.key())?;
@@ -209,7 +209,21 @@ impl<'info> LiquidityPoolAccount<'info> for Account<'info, LiquidityPool> {
             )?;
             Ok(())
         }
+    }
 
+    fn determine_auto_fund_pool_interval(
+        &self,
+        pool_token_account_balance: u64,
+        stake_amounts: u64,
+    ) -> Result<u64> {
+        // staking年化5%, 产出达到流动性池子balance的1%
+        // stake 1年跑过(432,000 / 2) * 365 / 2 = 15,768,000个slot
+        let slot_count = pool_token_account_balance
+            .checked_mul(15768000)
+            .unwrap()
+            .checked_div(stake_amounts)
+            .unwrap();
+        Ok(slot_count)
     }
 }
 

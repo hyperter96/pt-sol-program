@@ -1,6 +1,6 @@
-use anchor_lang::prelude::*;
-use anchor_spl::{token::{self, Mint, Token, TokenAccount}};
 use crate::constants::VAULT_SEED;
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Mint, Token, TokenAccount};
 
 pub fn initialize_staking(ctx: Context<InitializeStaking>) -> Result<()> {
     Ok(())

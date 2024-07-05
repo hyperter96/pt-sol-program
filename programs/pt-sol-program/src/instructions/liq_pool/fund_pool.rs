@@ -1,12 +1,15 @@
 //! Instruction: InitializePriceData
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token::{TokenAccount, Token, Mint}};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint, Token, TokenAccount},
+};
+use clockwork_sdk::state::Thread;
 
-use crate::state::*;
+use crate::{constants::THREAD_AUTHORITY_SEED, state::*};
 
 /// 添加资产到流动性池子
 pub fn fund_pool(ctx: Context<FundPool>, amount: u64) -> Result<()> {
-
     let pool = &mut ctx.accounts.pool;
 
     // Deposit: (From, To, amount)
@@ -23,7 +26,7 @@ pub fn fund_pool(ctx: Context<FundPool>, amount: u64) -> Result<()> {
         &ctx.accounts.system_program,
         &ctx.accounts.token_program,
     )?;
-    
+
     Ok(())
 }
 
@@ -67,4 +70,14 @@ pub struct FundPool<'info> {
 
     /// AT程序
     pub associated_token_program: Program<'info, AssociatedToken>,
+
+    /// Verify that only this thread can execute the Increment Instruction
+    #[account(signer, constraint = thread.authority.eq(&thread_authority.key()))]
+    pub thread: Account<'info, Thread>,
+
+    /// The Thread Admin
+    /// The authority that was used as a seed to derive the thread address
+    /// `thread_authority` should equal `thread.thread_authority`
+    #[account(seeds = [THREAD_AUTHORITY_SEED], bump)]
+    pub thread_authority: SystemAccount<'info>,
 }

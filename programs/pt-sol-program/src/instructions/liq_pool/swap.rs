@@ -1,12 +1,14 @@
 //! Instruction: SwapDia
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token::{Token, Mint, TokenAccount}};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint, Token, TokenAccount},
+};
 
 use crate::error::*;
 use crate::state::*;
 
 pub fn swap(ctx: Context<Swap>, amount_to_swap: u64) -> Result<()> {
-    
     // Make sure the amount is not zero
     if amount_to_swap == 0 {
         return Err(SwapProgramError::InvalidSwapZeroAmount.into());
@@ -43,7 +45,6 @@ pub fn swap(ctx: Context<Swap>, amount_to_swap: u64) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct Swap<'info> {
-
     /// LP池子的账户
     #[account(
         mut,
@@ -101,5 +102,4 @@ pub struct Swap<'info> {
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-
 }

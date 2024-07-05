@@ -2,12 +2,11 @@
 use anchor_lang::prelude::*;
 
 // 2. Declare Program ID (SolPG will automatically update this when you deploy)
+pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod state;
-pub mod constants;
 use instructions::*;
-
 
 declare_id!("8hhtjU7SSNWRwoTsj4t6CRvGrpcBRDoq6Vp4oggZBgm2");
 
@@ -53,4 +52,3 @@ pub mod pt_sol_program {
         staking::unstake(ctx)
     }
 }
-

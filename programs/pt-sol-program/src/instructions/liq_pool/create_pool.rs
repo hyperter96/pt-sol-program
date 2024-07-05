@@ -7,10 +7,9 @@ use crate::state::*;
 pub fn create_pool(ctx: Context<CreatePool>) -> Result<()> {
     // Initialize the new `LiquidityPool` state
     ctx.accounts.pool.set_inner(LiquidityPool::new(
-        ctx.bumps
-            .pool
-            // .expect("Failed to fetch bump for `pool`"),
+        ctx.bumps.pool, // .expect("Failed to fetch bump for `pool`"),
     ));
+
     Ok(())
 }
 
