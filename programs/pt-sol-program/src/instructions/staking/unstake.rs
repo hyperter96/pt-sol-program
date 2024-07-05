@@ -104,6 +104,6 @@ pub struct UnStake<'info> {
 
     pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
-    pub assoicated_token_program: Program<'info, AssociatedToken>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }

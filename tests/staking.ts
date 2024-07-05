@@ -1,8 +1,9 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+import fs from "fs";
 import { PtSolProgram } from "../target/types/pt_sol_program";
 import { Connection, Keypair, PublicKey, clusterApiUrl } from "@solana/web3.js";
-import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 
 describe("test", () => {
   // Configure the client to use the local cluster.
@@ -16,7 +17,14 @@ describe("test", () => {
   const connection = new Connection("http://127.0.0.1:8899", "confirmed");
 
   // 铸造的keypair
-  const mintKeypair = Keypair.generate();
+  var mintKeypair;
+  if (fs.existsSync("./tests/utils/staking_mint_secret.json")) {
+    const secret = new Uint8Array(fs.readFileSync("./tests/utils/staking_mint_secret.json"))
+    mintKeypair = Keypair.fromSecretKey(secret)
+  } else {
+    mintKeypair = Keypair.generate();
+    fs.appendFileSync("./tests/utils/staking_mint_secret.json", Buffer.from(mintKeypair.secretKey));
+  }
   // const mintKeypair = Keypair.generate();
   // console.log(mintKeypair);
 
@@ -50,6 +58,8 @@ describe("test", () => {
       signer: payer.publicKey,
       tokenVaultAccount: vaultAccount,
       mint: mint.toBase58(),
+      tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: anchor.web3.SystemProgram.programId,
     };
 
     const tx = await program.methods
@@ -103,6 +113,9 @@ describe("test", () => {
       userTokenAccount: userTokenAccount.address,
       mint: mintKeypair.publicKey,
       signer: payer.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram: anchor.web3.SystemProgram.programId,
     }
 
     const tx = await program.methods
@@ -157,6 +170,9 @@ describe("test", () => {
       stakeAccount: stakeAccount,
       signer: payer.publicKey,
       mint: mintKeypair.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram: anchor.web3.SystemProgram.programId,
     }
 
     const tx = await program.methods
