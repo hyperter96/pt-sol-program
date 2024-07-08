@@ -1,4 +1,13 @@
-export const ASSETS: [string, string, string, string, number, number][] = [
+import * as anchor from "@coral-xyz/anchor";
+import { Connection, Keypair } from "@solana/web3.js";
+import fs from "fs";
+// import { ASSETS } from "./utils/assets";
+import { mintNewTokens } from "./utils/token";
+import { LENGTH_SIZE } from "@solana/spl-token";
+
+const METADATA = false;
+
+const ASSETS: [string, string, string, string, number, number][] = [
   [
     "Hyper Solana",
     "HYSOL",
@@ -88,3 +97,39 @@ export const ASSETS: [string, string, string, string, number, number][] = [
     100,
   ],
 ];
+
+describe("[Running Setup Script]: Create Assets", () => {
+  const provider = anchor.AnchorProvider.env();
+  const payer = (provider.wallet as anchor.Wallet).payer;
+  anchor.setProvider(provider);
+  const connection = new Connection("http://127.0.0.1:8899", "confirmed");
+
+  it("Creating Assets", async () => {
+    let assets_conf = {
+      assets: [],
+    };
+
+    for (const a of ASSETS) {
+      const mintKeypair = Keypair.generate();
+      await mintNewTokens(
+        connection,
+        payer.publicKey,
+        payer.secretKey,
+        mintKeypair,
+        a,
+        METADATA
+      );
+      assets_conf.assets.push({
+        name: a[0],
+        symbol: a[1],
+        description: a[2],
+        uri: a[3],
+        decimals: a[4],
+        quantity: a[5],
+        address: mintKeypair.publicKey.toBase58(),
+      });
+    }
+
+    fs.writeFileSync("./tests/utils/assets.json", JSON.stringify(assets_conf));
+  });
+});

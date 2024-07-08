@@ -15,10 +15,10 @@ use clockwork_sdk::{
 };
 use solana_program::{clock::Clock, instruction::Instruction, native_token::LAMPORTS_PER_SOL};
 
-pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
+pub fn stake(ctx: Context<Stake>, amount: u64, thread_id: Vec<u8>) -> Result<()> {
     // 先拿到stake信息
     let stake_info = &mut ctx.accounts.stake_info_account;
-    let thread_id = StakeInfo::get_thread_id(stake_info.key());
+    // let thread_id = StakeInfo::get_thread_id(stake_info.key());
     if stake_info.is_staked {
         return Err(StakingError::IsStaked.into());
     }
@@ -84,7 +84,7 @@ fn schedule_auto_fund_pool(ctx: Context<Stake>, amount: u64, thread_id: Vec<u8>)
             token_program: token_program.key(),
             associated_token_program: associated_token_program.key(),
         }
-        .to_account_metas(None),
+        .to_account_metas(Some(true)),
         data: crate::instruction::FundPool {
             amount: pool_token_account.amount.checked_div(100).unwrap(),
         }
@@ -121,6 +121,7 @@ fn schedule_auto_fund_pool(ctx: Context<Stake>, amount: u64, thread_id: Vec<u8>)
 }
 
 #[derive(Accounts)]
+#[instruction(amount: u64, thread_id: Vec<u8>)]
 pub struct Stake<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -180,7 +181,7 @@ pub struct Stake<'info> {
     /// Address to assign to the newly created thread.
     #[account(
         mut,
-        address = Thread::pubkey(thread_authority.key(), StakeInfo::get_thread_id(stake_info_account.key()))
+        address = Thread::pubkey(thread_authority.key(), thread_id),
     )]
     pub thread: SystemAccount<'info>,
 

@@ -13,4 +13,4 @@ pub const TOKEN_SEED: &[u8] = b"token";
 pub const STAKE_INFO_SEED: &[u8] = b"stake_info";
 
 #[constant]
-pub const THREAD_AUTHORITY_SEED: &[u8] = b"thread_authority";
+pub const THREAD_AUTHORITY_SEED: &[u8] = b"authority";

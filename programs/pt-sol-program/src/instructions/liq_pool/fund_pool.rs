@@ -31,6 +31,7 @@ pub fn fund_pool(ctx: Context<FundPool>, amount: u64) -> Result<()> {
 }
 
 #[derive(Accounts)]
+#[instruction(amount: u64)]
 pub struct FundPool<'info> {
     /// Liquidity Pool
     #[account(
@@ -71,8 +72,8 @@ pub struct FundPool<'info> {
     /// AT程序
     pub associated_token_program: Program<'info, AssociatedToken>,
 
-    /// Verify that only this thread can execute the Increment Instruction
-    #[account(signer, constraint = thread.authority.eq(&thread_authority.key()))]
+    /// Verify that only this thread can execute the FundPool Instruction
+    #[account(constraint = thread.authority.eq(&thread_authority.key()))]
     pub thread: Account<'info, Thread>,
 
     /// The Thread Admin

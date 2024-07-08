@@ -8,7 +8,7 @@ pub mod instructions;
 pub mod state;
 use instructions::*;
 
-declare_id!("8hhtjU7SSNWRwoTsj4t6CRvGrpcBRDoq6Vp4oggZBgm2");
+declare_id!("iYKtp9m8Kf922xuDmNjLmJ1AQQYRCNJE99AHfY4NYRJ");
 
 // 3. Define the program and instructions
 #[program]
@@ -43,8 +43,8 @@ pub mod pt_sol_program {
     }
 
     /// stake
-    pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
-        staking::stake(ctx, amount)
+    pub fn stake(ctx: Context<Stake>, amount: u64, thread_id: Vec<u8>) -> Result<()> {
+        staking::stake(ctx, amount, thread_id)
     }
 
     /// unstake

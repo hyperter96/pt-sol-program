@@ -8,7 +8,7 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, transfer, Mint, Token, TokenAccount, Transfer},
 };
-use clockwork_sdk::{cpi::ThreadDelete, state::Thread, ThreadProgram};
+use clockwork_sdk::{cpi::ThreadDelete, state::{Thread, ThreadAccount}, ThreadProgram};
 use solana_program::clock::Clock;
 
 pub fn unstake(ctx: Context<UnStake>) -> Result<()> {
@@ -73,18 +73,16 @@ pub fn unstake(ctx: Context<UnStake>) -> Result<()> {
 }
 
 fn cleanup(ctx: &Context<UnStake>) -> Result<()> {
-    if !ctx.accounts.thread.data_is_empty() {
-        let bump = ctx.bumps.thread_authority;
-        clockwork_sdk::cpi::thread_delete(CpiContext::new_with_signer(
-            ctx.accounts.clockwork_thread_program.to_account_info(),
-            ThreadDelete {
-                authority: ctx.accounts.thread_authority.to_account_info(),
-                close_to: ctx.accounts.signer.to_account_info(),
-                thread: ctx.accounts.thread.to_account_info(),
-            },
-            &[&[ctx.accounts.mint.key().as_ref(), &[bump]]],
-        ))?;
-    }
+    let bump = ctx.bumps.thread_authority;
+    clockwork_sdk::cpi::thread_delete(CpiContext::new_with_signer(
+        ctx.accounts.clockwork_thread_program.to_account_info(),
+        ThreadDelete {
+            authority: ctx.accounts.thread_authority.to_account_info(),
+            close_to: ctx.accounts.signer.to_account_info(),
+            thread: ctx.accounts.thread.to_account_info(),
+        },
+        &[&[ctx.accounts.mint.key().as_ref(), &[bump]]],
+    ))?;
 
     Ok(())
 }
@@ -133,8 +131,8 @@ pub struct UnStake<'info> {
 
     // clockwork
     /// Address to assign to the newly created thread.
-    #[account(mut, address = Thread::pubkey(thread_authority.key(), StakeInfo::get_thread_id(stake_info_account.key())))]
-    pub thread: SystemAccount<'info>,
+    #[account(mut, address = thread.pubkey(), constraint = thread.authority.eq(&thread_authority.key()))]
+    pub thread: Account<'info, Thread>,
 
     /// The pda that will own and manage the thread.
     #[account(seeds = [THREAD_AUTHORITY_SEED], bump)]

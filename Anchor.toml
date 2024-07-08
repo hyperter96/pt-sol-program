@@ -5,7 +5,7 @@ resolution = false
 skip-lint = false
 
 [programs.localnet]
-pt_sol_program = "8hhtjU7SSNWRwoTsj4t6CRvGrpcBRDoq6Vp4oggZBgm2"
+pt_sol_program = "iYKtp9m8Kf922xuDmNjLmJ1AQQYRCNJE99AHfY4NYRJ"
 
 [registry]
 url = "https://api.apr.dev"
@@ -15,8 +15,9 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/staking.ts"
-# staking = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/staking.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/main.test.ts"
+# tokens = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/tokens.test.ts"
+# staking = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/staking.test.ts"
 
 [test]
 startup_wait = 5000
