@@ -23,11 +23,11 @@
 
     $$
     \begin{align*}
-        \frac{\text{stake\_amount} \times 5\%}{365 \times 216,000 \text{ slot}} &= \frac{\text{pool\_total\_amount} \times 1\%}{x} \\
-        x &= \frac{\text{pool\_total\_amount} \times 15,768,000 \text{ slot}}{\text{stake\_amount}}
+    \frac{\text{stake\_amount} \times 5\%}{365 \times 216,000 \text{ slot}} &= \frac{\text{pool\_total\_amount} \times 1\%}{x} \\
+    x &= \frac{\text{pool\_total\_amount} \times 15,768,000 \text{ slot}}{\text{stake\_amount}}
     \end{align*}
     $$
-    
+
     当达到触发条件时，`Thread`会调用`FundPool`将`vault_token_account`的`Token`转移到`pool_token_account`中
     - `unStake`：将`vault`账户和`stake`账户的`Token`转移到`UserToken`账户，同时`Thread`销毁
 
@@ -41,9 +41,9 @@
 
 关于计算Swap则是采用了恒定乘积做市商模型 Constant Product Market Maker Model：
 
-公式非常的简单：$x * y = K$ 。令交易的两虚拟货币为 $X$ 和 $Y$，各自数量为 $x$ 和 $y$，两货币数量的乘积 $x * y$ 恒等于 $K$，$K$ 值是由第一笔注入的流动性所决定。
+公式非常的简单：$x * y = K$，令交易的两虚拟货币为 $X$ 和 $Y$，各自数量为 $x$ 和 $y$，两货币数量的乘积 $x * y$ 恒等于 $K$，$K$ 值是由第一笔注入的流动性所决定。
 
-因此，用 $∆x$ 数量的 $X$ 币来购买 $Y$ 币所能得到的数量 $∆y$、或是为了购买 $∆y$ 需要付出的 $∆x$ 数量，依照此公式进行计算：$(x+∆x)(y-∆y) = K$ ，而交易的价格就是两币量 $∆x$ 和 $∆y$ 的比。
+因此，用 $∆x$ 数量的 $X$ 币来购买 $Y$ 币所能得到的数量 $∆y$、或是为了购买 $∆y$ 需要付出的 $∆x$ 数量，依照此公式进行计算：$(x+∆x)(y-∆y) = K$，而交易的价格就是两币量 $∆x$ 和 $∆y$ 的比。
 
 以下公式用 $α = \frac{∆x}{x}$ 和 $β = \frac{∆y}{y}$ 来表示 $∆x$ 和 $∆y$ 及 $X$ $Y$ 两币在交易发生后的新均衡数量：
 
@@ -63,7 +63,7 @@ $$
 \end{align*}
 $$
 
-如果计入手续费，设 $\rho = 1\%$ 的手续费，$\gamma = 1-\rho$ ， 则
+如果计入手续费，设 $\rho = 1\%$ 的手续费，$\gamma = 1-\rho$ 则
 
 $$
 \begin{align*}
