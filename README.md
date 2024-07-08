@@ -19,16 +19,8 @@
 - `staking`模块：
 
     - `initStaking`: 初始化关于`stake`的账户，包括`vault`账户用于存放`stake`奖励、`stakingInfo`账户用于记录`stake`信息和`stake`账户用于存放`Token`
-    - `stake`：将`UserToken`账户中`Token`转移到`stake`账户，同时创建`Thread`，里面`Trigger`是按照需求标准计算出需要的slot，stake 需要跑过 $x$ 个slot:
-
-        $$
-        \begin{align*}
-        \frac{\text{stake\_amount} \times 5\%}{365 \times 216,000 \text{ slot}} &= \frac{\text{pool\_total\_amount} \times 1\%}{x} \\
-        x &= \frac{\text{pool\_total\_amount} \times 15,768,000 \text{ slot}}{\text{stake\_amount}}
-        \end{align*}
-        $$
-
-        当达到触发条件时，`Thread`会调用`FundPool`将`vault_token_account`的`Token`转移到`pool_token_account`中
+    - `stake`：将`UserToken`账户中`Token`转移到`stake`账户，同时创建`Thread`，里面`Trigger`是按照需求标准计算出需要的slot, 通过解 $\frac{\text{stake\_amount} \times 5\%}{365 \times 216,000 \text{ slot}} = \frac{\text{pool\_total\_amount} \times 1\%}{x}$, stake 需要跑过 $x = \frac{\text{pool\_total\_amount} \times 15,768,000 \text{ slot}}{\text{stake\_amount}}$，
+    当达到触发条件时，`Thread`会调用`FundPool`将`vault_token_account`的`Token`转移到`pool_token_account`中
 
     - `unStake`：将`vault`账户和`stake`账户的`Token`转移到`UserToken`账户，同时`Thread`销毁
 
