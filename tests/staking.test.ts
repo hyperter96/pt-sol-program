@@ -165,7 +165,22 @@ describe("test", () => {
 
   it("Is initialized!", async () => {
     // 创建mint token
-    let mint = await createMintToken(connection, payer, mintKeypair);
+    const [metadataAddress] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(METADATA_SEED),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mintKeypair.publicKey.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    );
+    let metadata = {
+      name: "Peter Solana",
+      symbol: "PETERSOL",
+      uri: "https://arweave.net/NmBFKuCWk4yfAB4a6EGwXlWM92q5B9nBZMlRhpVA4y4",
+    }
+    await initToken(program, payer, mintKeypair.publicKey, mintKeypair.secretKey, metadata, metadataAddress)
+
+    await mintTokens(program, payer, mintKeypair.publicKey, new anchor.BN(100))
 
     // 创建vault账户
     let [vaultAccount] = PublicKey.findProgramAddressSync(
@@ -177,7 +192,7 @@ describe("test", () => {
     let initAccount = {
       signer: payer.publicKey,
       tokenVaultAccount: vaultAccount,
-      mint: mint.toBase58(),
+      mint: mintKeypair.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
       systemProgram: anchor.web3.SystemProgram.programId,
     };
@@ -261,6 +276,55 @@ describe("test", () => {
     console.log("Your transaction signature", tx);
   });
 
+  it(`Fund Pool with token PETER Solana: 50 PETERSOL`, async () => {
+
+    await fundPool(
+          program,
+          payer.payer.publicKey,
+          payer.payer.secretKey,
+          poolAddress,
+          mintKeypair.publicKey,
+          50,
+          3,
+          threadAddress,
+          threadAuthority
+      )
+  })
+
+  for (const a of ASSETS) {
+    const mintKeypair = Keypair.generate();
+    it(`Fund Pool with token ${a[0]}: ${a[5]} ${a[1]}`, async () => {
+
+      const [metadataAddress] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from(METADATA_SEED),
+          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+          mintKeypair.publicKey.toBuffer(),
+        ],
+        TOKEN_METADATA_PROGRAM_ID
+      );
+      let metadata = {
+        name: a[0],
+        symbol: a[1],
+        uri: a[3],
+      }
+      await initToken(program, payer, mintKeypair.publicKey, mintKeypair.secretKey, metadata, metadataAddress)
+
+      await mintTokens(program, payer, mintKeypair.publicKey, new anchor.BN(a[5]))
+      await fundPool(
+            program,
+            payer.payer.publicKey,
+            payer.payer.secretKey,
+            poolAddress,
+            mintKeypair.publicKey,
+            a[5],
+            a[4],
+            threadAddress,
+            threadAuthority
+        )
+    })
+  }
+  
   it("unstake", async () => {
     // 创建user的token账户
     let userTokenAccount = await getOrCreateAssociatedTokenAccount(
@@ -318,39 +382,5 @@ describe("test", () => {
 
     console.log("Your transaction signature", tx);
   });
-
-  for (const a of ASSETS) {
-    const mintKeypair = Keypair.generate();
-    it(`Fund Pool with token ${a[0]}: ${a[5]} ${a[1]}`, async () => {
-
-      const [metadataAddress] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(METADATA_SEED),
-          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-          mintKeypair.publicKey.toBuffer(),
-        ],
-        TOKEN_METADATA_PROGRAM_ID
-      );
-      let metadata = {
-        name: a[0],
-        symbol: a[1],
-        uri: a[3],
-      }
-      await initToken(program, payer, mintKeypair.publicKey, mintKeypair.secretKey, metadata, metadataAddress)
-
-      await mintTokens(program, payer, mintKeypair.publicKey, new anchor.BN(a[5]))
-      await fundPool(
-            program,
-            payer.payer.publicKey,
-            payer.payer.secretKey,
-            poolAddress,
-            mintKeypair.publicKey,
-            a[5],
-            a[4],
-            threadAddress,
-            threadAuthority
-        )
-    })
-  } 
 
 });

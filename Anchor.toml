@@ -7,6 +7,9 @@ skip-lint = false
 [programs.localnet]
 pt_sol_program = "iYKtp9m8Kf922xuDmNjLmJ1AQQYRCNJE99AHfY4NYRJ"
 
+[programs.devnet]
+pt_sol_program = "iYKtp9m8Kf922xuDmNjLmJ1AQQYRCNJE99AHfY4NYRJ"
+
 [registry]
 url = "https://api.apr.dev"
 
